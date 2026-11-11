@@ -22,9 +22,9 @@
   html, body { margin: 0; height: 100%; overflow: hidden; background: linear-gradient(var(--top) 50%, var(--bottom) 50%); }
   iframe {
     position: fixed; border: 0; left: env(safe-area-inset-left, 0); right: env(safe-area-inset-right, 0);
-    top: env(safe-area-inset-top, 0); bottom: env(safe-area-inset-bottom, 0);
+    top: env(safe-area-inset-top, 0); bottom: 0;
     width: calc(100% - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
-    height: calc(100% - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    height: calc(100% - env(safe-area-inset-top, 0px));
     opacity: 0; transition: opacity .4s ease;
   }
   iframe.ready { opacity: 1; }
@@ -48,9 +48,16 @@
       <div class="bar"></div>
     </div>
   </div>
-  <iframe id="app" title="บัญชีรับ-จ่าย" allow="clipboard-write" src="https://script.google.com/macros/s/AKfycbwSh4nMQaqiCoipORORlfLCbdC-ue9PkgOJUueuYqG9wm8WkK47fkQ5gGda1cky6Ml69A/exec"></iframe>
+  <iframe id="app" title="บัญชีรับ-จ่าย" allow="clipboard-write"></iframe>
   <script>
     var f = document.getElementById('app'), s = document.getElementById('splash');
+    // iframe ยืดถึงขอบล่างจอ แต่ข้างใน iframe อ่าน env(safe-area-inset-bottom) ไม่ได้ → วัดแล้วส่งเป็นพารามิเตอร์ sb
+    var probe = document.createElement('div');
+    probe.style.cssText = 'position:fixed;visibility:hidden;padding-bottom:env(safe-area-inset-bottom,0px)';
+    document.body.appendChild(probe);
+    var sb = Math.round(parseFloat(getComputedStyle(probe).paddingBottom) || 0);
+    probe.remove();
+    f.src = 'https://script.google.com/macros/s/AKfycbwSh4nMQaqiCoipORORlfLCbdC-ue9PkgOJUueuYqG9wm8WkK47fkQ5gGda1cky6Ml69A/exec?sb=' + sb;
     function show() { f.classList.add('ready'); s.classList.add('gone'); }
     // Apps Script โหลดหลายชั้น: รอเฟรมโหลด + เผื่อเวลาให้หน้าแอปวาดเสร็จ
     f.addEventListener('load', function () { setTimeout(show, 700); });
